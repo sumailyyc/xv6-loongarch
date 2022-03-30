@@ -16,6 +16,9 @@ _entry:
         # stack0 is declared in start.c,
         # with a 4096-byte stack per CPU.
         # sp = stack0 + (hartid * 4096)
+        la.global   $t0, 0f
+        jirl        $zero, $t0, 0
+      0:      
         la          $sp, stack0
         li.d        $a0, 1024*4
 	csrrd       $a1, LOONGARCH_CSR_CPUID

@@ -6,5 +6,5 @@
 
 
 // qemu puts UART registers here in physical memory.
-#define UART0 0x1fe001e0
+#define UART0 0x900000001fe001e0
 #define UART0_IRQ 10
