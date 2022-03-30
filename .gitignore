@@ -6,6 +6,7 @@
 *.ko
 *.obj
 *.elf
+*.asm
 
 # Linker output
 *.ilk
@@ -52,3 +53,4 @@ Mkfile.old
 dkms.conf
 
 .vscode/*
+/kernel/kernel

@@ -11,6 +11,6 @@ Porting the xv6 OS to the LoongArch. Inspired by MIT's xv6-riscv Edition, check 
 ```bash
 
 make
-cd qemu-loongarch-runenv
+cd qemu-loongarch64-runenv
 ./run_loongach.sh -k ../kernel/kernel
 ```
