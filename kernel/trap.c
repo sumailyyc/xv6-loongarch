@@ -45,7 +45,7 @@ kerneltrap()//todo
 
   if((which_dev = devintr()) == 0){
     printf("estat %p\n", r_csr_estat());
-    printf("era=%p eentry=%p tlbrelo0=%p tlbrelo1=%p\n", r_csr_era(), r_csr_eentry(), r_csr_tlbrelo0(), r_csr_tlbrelo1());
+    printf("era=%p eentry=%p\n", r_csr_era(), r_csr_eentry());
     panic("kerneltrap");
   }
 

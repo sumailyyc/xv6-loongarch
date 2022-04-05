@@ -221,6 +221,7 @@ intr_off()
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE-1))
 
 #define PTE_V (1L << 0) // valid
+#define PTE_D (1L << 1) // dirty
 #define PTE_PLV (3L << 2) //privilege level
 #define PTE_MAT (1L << 4) //memory access type
 #define PTE_P (1L << 7) // physical page exists
