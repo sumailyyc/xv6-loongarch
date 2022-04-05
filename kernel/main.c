@@ -19,8 +19,23 @@ main()
     printf("\n");
     printf("xv6 kernel is booting\n");
     printf("\n");
+    kinit();         // physical page allocator
+    printf("physical memory init\n");
+    tlbinit();
+    printf("tlb init\n");
+    vminit();        // create kernel page table
+    printf("virtual memory init\n");
+    procinit();      // process table
+    printf("proc init\n");
+    trapinit();      // trap vectors
+    printf("trap init\n");
+    int* p = (int*)0x0UL;
+    *p = 19981119;
+    int k = *p;
+    printf("%d\n",k);
     __sync_synchronize();
     started = 1;
+    printf("init done\n");
   } else {
     while(started == 0)
       ;

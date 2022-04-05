@@ -3,8 +3,16 @@
 // 0x00200000 -- bios loads kernel here and jumps here
 // 0x1c000000 -- reset address
 // 0x1fe001e0 -- uart16550 serial port
+// 0x90000000 -- RAM used by user pages
 
+#define DMWIN_MASK 0x9000000000000000
 
-// qemu puts UART registers here in physical memory.
-#define UART0 0x900000001fe001e0
+// qemu puts UART registers here in virtual memory.
+#define UART0 (0x1fe001e0UL | DMWIN_MASK)
 #define UART0_IRQ 10
+
+// the kernel expects there to be RAM
+// for use by user pages
+// from physical address 0x90000000 to PHYSTOP.
+#define RAMBASE (0x90000000UL | DMWIN_MASK)
+#define RAMSTOP (RAMBASE + 1024*1024*1024)

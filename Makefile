@@ -12,7 +12,13 @@ OBJS = \
   $K/swtch.o \
   $K/console.o \
   $K/sleeplock.o \
-  $K/file.o
+  $K/file.o \
+  $K/kalloc.o\
+  $K/vm.o\
+  $K/trap.o\
+  $K/kernelvec.o\
+  $K/tlbrefill.o\
+  $K/merror.o
 
 TOOLPREFIX = loongarch64-unknown-linux-gnu-
 

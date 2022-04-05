@@ -32,6 +32,6 @@ swtch:
         ld.d $s8, $a1, 80
         ld.d $fp, $a1, 88
         
-        ertn
+        jirl $zero, $ra, 0
 
 	

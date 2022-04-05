@@ -8,6 +8,15 @@ SECTIONS
   .text : {
     *(.text .text.*)
     . = ALIGN(0x1000);
+    _eentry = .;
+    *(eentry)
+    . = ALIGN(0x1000);
+    _tlbrentry = .;
+    *(tlbrentry)
+    . = ALIGN(0x1000);
+    _merrentry = .;
+    *(merrentry)
+    . = ALIGN(0x1000);
     PROVIDE(etext = .);
   }
 

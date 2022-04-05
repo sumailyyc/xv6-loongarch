@@ -8,17 +8,23 @@
 .section .text
 .global _entry
 _entry:
-        li.d        $t0, 0x8000000000000000   
+        la.global   $t0, 0f
+        jirl        $zero, $t0, 0
+0:      li.d        $t0, 0x9000000000000011   # CA, PLV0, 0x9000 xxxx xxxx xxxx
         csrwr       $t0, LOONGARCH_CSR_DMWIN0
-        li.d        $t0, 0x9000000000000011   # CA, PLV0, 0x9000 xxxx xxxx xxxx
+        li.d        $t0, 0x0000000000000000   
         csrwr       $t0, LOONGARCH_CSR_DMWIN1
+        csrwr       $t0, LOONGARCH_CSR_DMWIN2
+        csrwr       $t0, LOONGARCH_CSR_DMWIN3
+        csrwr       $t0, LOONGARCH_CSR_TLBRENTRY	
+        li.w	    $t0, 0xb0		      # PLV=0, IE=0, PG=1
+	csrwr	    $t0, LOONGARCH_CSR_CRMD
+        invtlb      0x0,$zero,$zero
 	# set up a stack for C.
         # stack0 is declared in start.c,
         # with a 4096-byte stack per CPU.
         # sp = stack0 + (hartid * 4096)
-        la.global   $t0, 0f
-        jirl        $zero, $t0, 0
-      0:      
+     
         la          $sp, stack0
         li.d        $a0, 1024*4
 	csrrd       $a1, LOONGARCH_CSR_CPUID

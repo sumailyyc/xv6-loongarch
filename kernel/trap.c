@@ -1,0 +1,107 @@
+#include "types.h"
+#include "param.h"
+#include "memlayout.h"
+#include "loongarch.h"
+#include "spinlock.h"
+#include "proc.h"
+#include "defs.h"
+
+struct spinlock tickslock;
+uint ticks;
+
+extern char trampoline[], uservec[], userret[];
+
+// in kernelvec.S, calls kerneltrap().
+void kernelvec();
+void handle_tlbr();
+void handle_merr();
+
+extern int devintr();
+
+void
+trapinit(void)
+{
+  initlock(&tickslock, "time");
+  uint32 ecfg = ( 0U << CSR_ECFG_VS_SHIFT ) | ( 1U << CSR_ECFG_LIE_TI_SHIFT );
+  w_csr_ecfg(ecfg);
+  w_csr_eentry((uint64)kernelvec);
+  w_csr_tlbrentry((uint64)handle_tlbr);
+  w_csr_merrentry((uint64)handle_merr);
+}
+
+// interrupts and exceptions from kernel code go here via kernelvec,
+// on whatever the current kernel stack is.
+void 
+kerneltrap()//todo
+{
+  int which_dev = 0;
+  uint64 era = r_csr_era();
+  uint64 prmd = r_csr_prmd();
+  
+  if((prmd & PRMD_PPLV) != 0)
+    panic("kerneltrap: not from privilege0");
+  if(intr_get() != 0)
+    panic("kerneltrap: interrupts enabled");
+
+  if((which_dev = devintr()) == 0){
+    printf("estat %p\n", r_csr_estat());
+    printf("era=%p eentry=%p tlbrelo0=%p tlbrelo1=%p\n", r_csr_era(), r_csr_eentry(), r_csr_tlbrelo0(), r_csr_tlbrelo1());
+    panic("kerneltrap");
+  }
+
+  // give up the CPU if this is a timer interrupt.
+  if(which_dev == 2 && myproc() != 0 && myproc()->state == RUNNING)
+    yield();
+
+  // the yield() may have caused some traps to occur,
+  // so restore trap registers for use by kernelvec.S's instruction.
+  w_csr_era(era);
+  w_csr_prmd(prmd);
+}
+
+void 
+machine_trap()
+{
+  panic("machine error");
+}
+
+void
+clockintr()
+{
+  //todo
+  acquire(&tickslock);
+  ticks++;
+  wakeup(&ticks);
+  release(&tickslock);
+}
+
+// check if it's an external interrupt or software interrupt,
+// and handle it.
+// returns 2 if timer interrupt,
+// 1 if other device,
+// 0 if not recognized.
+int
+devintr()
+{
+  uint32 estat = r_csr_estat();
+  uint32 ecfg = r_csr_ecfg();
+
+  if(estat & ecfg & HWI_VEC) {
+    //todo
+    return 1;
+  } else if(estat & ecfg & TI_VEC){
+    //timer interrupt,
+
+    if(cpuid() == 0){
+      clockintr();
+    }
+    
+    // acknowledge the timer interrupt by clearing
+    // the TI bit in TICLR.
+    w_csr_ticlr(r_csr_ticlr() | CSR_TICLR_CLR);
+
+    return 2;
+  } else {
+    return 0;
+  }
+}
