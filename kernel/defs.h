@@ -98,10 +98,10 @@ int             copyout(pagetable_t, uint64, char *, uint64);
 int             copyin(pagetable_t, char *, uint64, uint64);
 int             copyinstr(pagetable_t, char *, uint64, uint64);
 
-// iocr.c
-void            iocrinit(void);
-uint32          iocr_claim(void);
-void            iocr_complete(uint32 irq);
+// iocsr.c
+void            iocsrinit(void);
+uint32          iocsr_claim(void);
+void            iocsr_complete(uint32 irq);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

@@ -19,7 +19,7 @@ OBJS = \
   $K/kernelvec.o\
   $K/tlbrefill.o\
   $K/merror.o\
-  $K/iocr.o
+  $K/iocsr.o
 
 TOOLPREFIX = loongarch64-unknown-linux-gnu-
 

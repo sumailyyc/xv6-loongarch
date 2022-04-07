@@ -1,3 +1,5 @@
+#include <larchintrin.h>
+
 #define  CSR_CRMD_IE_SHIFT		    2
 #define  CSR_CRMD_IE			        ( 0x1 << CSR_CRMD_IE_SHIFT )
 
@@ -191,6 +193,17 @@ static inline void
 w_csr_pwch(uint32 x)
 {
   asm volatile("csrwr %0, 0x1d" : : "r" (x) );
+}
+
+/* IOCSR */
+static inline uint32 iocsr_readl(uint32 reg)
+{
+	return __iocsrrd_w(reg);
+}
+
+static inline void iocsr_writel(uint32 val, uint32 reg)
+{
+	__iocsrwr_w(val, reg);
 }
 
 static inline int

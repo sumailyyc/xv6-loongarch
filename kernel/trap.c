@@ -34,6 +34,7 @@ trapinit(void)
 void 
 kerneltrap()//todo
 {
+  printf("trap\n");
   int which_dev = 0;
   uint64 era = r_csr_era();
   uint64 prmd = r_csr_prmd();
@@ -90,16 +91,16 @@ devintr()//todo
     // this is a hardware interrupt, via IOCR.
 
     // irq indicates which device interrupted.
-    uint32 irq = iocr_claim();
+    uint32 irq = iocsr_claim();
     if(irq & (1U << UART0_IRQ)){
       uartintr();
 
     // tell the IOCR the device is
     // now allowed to interrupt again.
-      iocr_complete(1U << UART0_IRQ);
+      iocsr_complete(1U << UART0_IRQ);
     } else if(irq){
        printf("unexpected interrupt irq=%d\n", irq);
-      iocr_complete(irq);
+      iocsr_complete(irq);
     }
 
     return 1;

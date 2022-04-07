@@ -29,11 +29,11 @@ main()
     printf("proc init\n");
     trapinit();      // trap vectors
     printf("trap init\n");
-    iocrinit();      // set up interrupt controller
+    iocsrinit();      // set up interrupt controller
     printf("iocr init\n");
     __sync_synchronize();
     started = 1;
-    intr_on();
+  //  intr_on();
     printf("init done\n");
   } else {
     while(started == 0)
