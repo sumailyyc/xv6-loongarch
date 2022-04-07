@@ -49,7 +49,7 @@ kfree(void *pa)
     panic("kfree");
 
   // Fill with junk to catch dangling refs.
-  memset(pa, 1, PGSIZE);//todo
+  memset(pa, 1, PGSIZE);
 
   r = (struct run*)pa;
 
@@ -74,6 +74,6 @@ kalloc(void)
   release(&kmem.lock);
 
   if(r)
-    memset((char*)r, 5, PGSIZE); // fill with junk  //todo
+    memset((char*)r, 5, PGSIZE); // fill with junk 
   return (void*)r;
 }

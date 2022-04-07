@@ -22,7 +22,7 @@ void
 trapinit(void)
 {
   initlock(&tickslock, "time");
-  uint32 ecfg = ( 0U << CSR_ECFG_VS_SHIFT ) | ( 1U << CSR_ECFG_LIE_TI_SHIFT );
+  uint32 ecfg = ( 0U << CSR_ECFG_VS_SHIFT ) | HWI_VEC;
   w_csr_ecfg(ecfg);
   w_csr_eentry((uint64)kernelvec);
   w_csr_tlbrentry((uint64)handle_tlbr);
@@ -44,7 +44,7 @@ kerneltrap()//todo
     panic("kerneltrap: interrupts enabled");
 
   if((which_dev = devintr()) == 0){
-    printf("estat %p\n", r_csr_estat());
+    printf("estat %x\n", r_csr_estat());
     printf("era=%p eentry=%p\n", r_csr_era(), r_csr_eentry());
     panic("kerneltrap");
   }
@@ -81,13 +81,27 @@ clockintr()
 // 1 if other device,
 // 0 if not recognized.
 int
-devintr()
+devintr()//todo
 {
   uint32 estat = r_csr_estat();
   uint32 ecfg = r_csr_ecfg();
 
   if(estat & ecfg & HWI_VEC) {
-    //todo
+    // this is a hardware interrupt, via IOCR.
+
+    // irq indicates which device interrupted.
+    uint32 irq = iocr_claim();
+    if(irq & (1U << UART0_IRQ)){
+      uartintr();
+
+    // tell the IOCR the device is
+    // now allowed to interrupt again.
+      iocr_complete(1U << UART0_IRQ);
+    } else if(irq){
+       printf("unexpected interrupt irq=%d\n", irq);
+      iocr_complete(irq);
+    }
+
     return 1;
   } else if(estat & ecfg & TI_VEC){
     //timer interrupt,

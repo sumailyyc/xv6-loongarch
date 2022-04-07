@@ -18,7 +18,8 @@ OBJS = \
   $K/trap.o\
   $K/kernelvec.o\
   $K/tlbrefill.o\
-  $K/merror.o
+  $K/merror.o\
+  $K/iocr.o
 
 TOOLPREFIX = loongarch64-unknown-linux-gnu-
 
