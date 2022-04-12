@@ -22,7 +22,7 @@ void
 trapinit(void)
 {
   initlock(&tickslock, "time");
-  uint32 ecfg = ( 0U << CSR_ECFG_VS_SHIFT ) | HWI_VEC;
+  uint32 ecfg = ( 0U << CSR_ECFG_VS_SHIFT ) | HWI_VEC ;
   w_csr_ecfg(ecfg);
   w_csr_eentry((uint64)kernelvec);
   w_csr_tlbrentry((uint64)handle_tlbr);
@@ -38,6 +38,10 @@ kerneltrap()//todo
   int which_dev = 0;
   uint64 era = r_csr_era();
   uint64 prmd = r_csr_prmd();
+  printf("estat %x\n", r_csr_estat());
+  printf("era=%p eentry=%p\n", r_csr_era(), r_csr_eentry());
+  printf("ISR_BASE:%p\n",iocsr_readq(LOONGARCH_IOCSR_EXTIOI_ISR_BASE));
+  printf("ISR:%p\n",*(volatile uint64*)(LS7A_INT_STATUS_REG));
   
   if((prmd & PRMD_PPLV) != 0)
     panic("kerneltrap: not from privilege0");
@@ -91,16 +95,16 @@ devintr()//todo
     // this is a hardware interrupt, via IOCR.
 
     // irq indicates which device interrupted.
-    uint32 irq = iocsr_claim();
+    uint64 irq = apic_claim();
     if(irq & (1U << UART0_IRQ)){
       uartintr();
 
-    // tell the IOCR the device is
+    // tell the apic the device is
     // now allowed to interrupt again.
-      iocsr_complete(1U << UART0_IRQ);
+      apic_complete(1U << UART0_IRQ);
     } else if(irq){
        printf("unexpected interrupt irq=%d\n", irq);
-      iocsr_complete(irq);
+      apic_complete(irq);
     }
 
     return 1;

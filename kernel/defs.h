@@ -27,6 +27,12 @@ void            release(struct spinlock*);
 void            push_off(void);
 void            pop_off(void);
 
+// sleeplock.c
+void            acquiresleep(struct sleeplock*);
+void            releasesleep(struct sleeplock*);
+int             holdingsleep(struct sleeplock*);
+void            initsleeplock(struct sleeplock*, char*);
+
 // string.c
 int             memcmp(const void*, const void*, uint);
 void*           memmove(void*, const void*, uint);
@@ -55,7 +61,7 @@ void            exit(int);
 int             fork(void);
 int             growproc(int);
 void            proc_mapstacks(pagetable_t);
-pagetable_t     proc_pagetable(struct proc *);
+pagetable_t     proc_pagetable(void);
 void            proc_freepagetable(pagetable_t, uint64);
 int             kill(int);
 struct cpu*     mycpu(void);
@@ -98,10 +104,67 @@ int             copyout(pagetable_t, uint64, char *, uint64);
 int             copyin(pagetable_t, char *, uint64, uint64);
 int             copyinstr(pagetable_t, char *, uint64, uint64);
 
-// iocsr.c
-void            iocsrinit(void);
-uint32          iocsr_claim(void);
-void            iocsr_complete(uint32 irq);
+// apic.c
+void            apic_init(void);
+uint64          apic_claim(void);
+void            apic_complete(uint64 irq);
+
+// virtio_disk.c
+void            virtio_disk_init(void);
+void            virtio_disk_rw(struct buf *, int);
+void            virtio_disk_intr(void);
+
+// bio.c
+void            binit(void);
+struct buf*     bread(uint, uint);
+void            brelse(struct buf*);
+void            bwrite(struct buf*);
+void            bpin(struct buf*);
+void            bunpin(struct buf*);
+
+// log.c
+void            initlog(int, struct superblock*);
+void            log_write(struct buf*);
+void            begin_op(void);
+void            end_op(void);
+
+// fs.c
+void            fsinit(int);
+int             dirlink(struct inode*, char*, uint);
+struct inode*   dirlookup(struct inode*, char*, uint*);
+struct inode*   ialloc(uint, short);
+struct inode*   idup(struct inode*);
+void            iinit();
+void            ilock(struct inode*);
+void            iput(struct inode*);
+void            iunlock(struct inode*);
+void            iunlockput(struct inode*);
+void            iupdate(struct inode*);
+int             namecmp(const char*, const char*);
+struct inode*   namei(char*);
+struct inode*   nameiparent(char*, char*);
+int             readi(struct inode*, int, uint64, uint, uint);
+void            stati(struct inode*, struct stat*);
+int             writei(struct inode*, int, uint64, uint, uint);
+void            itrunc(struct inode*);
+
+// file.c
+struct file*    filealloc(void);
+void            fileclose(struct file*);
+struct file*    filedup(struct file*);
+void            fileinit(void);
+int             fileread(struct file*, uint64, int n);
+int             filestat(struct file*, uint64 addr);
+int             filewrite(struct file*, uint64, int n);
+
+// pipe.c
+int             pipealloc(struct file**, struct file**);
+void            pipeclose(struct pipe*, int);
+int             piperead(struct pipe*, uint64, int);
+int             pipewrite(struct pipe*, uint64, int);
+
+// extioi.c
+void            extioi_init(void);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

@@ -19,7 +19,14 @@ OBJS = \
   $K/kernelvec.o\
   $K/tlbrefill.o\
   $K/merror.o\
-  $K/iocsr.o
+  $K/apic.o\
+  $K/extioi.o\
+  $K/virtio_disk.o\
+  $K/bio.o\
+  $K/log.o\
+  $K/fs.o\
+  $K/pipe.o\
+  $K/exec.o
 
 TOOLPREFIX = loongarch64-unknown-linux-gnu-
 

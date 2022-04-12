@@ -3,6 +3,16 @@
 #define  CSR_CRMD_IE_SHIFT		    2
 #define  CSR_CRMD_IE			        ( 0x1 << CSR_CRMD_IE_SHIFT )
 
+#define  EXT_INT_EN_SHIFT         48
+
+#define LOONGARCH_OTHER_FUNC	                0x0420
+#define LOONGARCH_IOCSR_EXTIOI_EN_BASE		    0x1600
+#define LOONGARCH_IOCSR_EXTIOI_BOUNCE_BASE	  0x1680
+#define LOONGARCH_IOCSR_EXTIOI_ISR_BASE		    0x1800
+#define LOONGARCH_IOCSR_EXTIOI_MAP_BASE       0x14c0
+#define LOONGARCH_IOCSR_EXTIOI_ROUTE_BASE	    0x1c00
+#define LOONGARCH_IOCSR_EXRIOI_NODETYPE_BASE  0x14a0
+
 // read and write tp, the thread pointer, which holds
 // this core's hartid (core number), the index into cpus[].
 static inline uint64
@@ -201,9 +211,19 @@ static inline uint32 iocsr_readl(uint32 reg)
 	return __iocsrrd_w(reg);
 }
 
+static inline uint64 iocsr_readq(uint32 reg)
+{
+	return __iocsrrd_d(reg);
+}
+
 static inline void iocsr_writel(uint32 val, uint32 reg)
 {
 	__iocsrwr_w(val, reg);
+}
+
+static inline void iocsr_writeq(uint64 val, uint32 reg)
+{
+	__iocsrwr_d(val, reg);
 }
 
 static inline int

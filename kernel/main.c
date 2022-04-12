@@ -29,11 +29,19 @@ main()
     printf("proc init\n");
     trapinit();      // trap vectors
     printf("trap init\n");
-    iocsrinit();      // set up interrupt controller
-    printf("iocr init\n");
+    apic_init();      // set up interrupt controller
+    printf("apic init\n");
+//    extioi_init();
+//    printf("extend interrupt controller init\n");
+    binit();         // buffer cache
+    printf("buffer init\n");
+    iinit();         // inode table
+    printf("inode table init\n");
+    fileinit();      // file table
+    printf("file table init\n");
     __sync_synchronize();
     started = 1;
-  //  intr_on();
+    intr_on();
     printf("init done\n");
   } else {
     while(started == 0)
