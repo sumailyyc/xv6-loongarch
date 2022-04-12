@@ -27,6 +27,7 @@ OBJS = \
   $K/fs.o\
   $K/pipe.o\
   $K/exec.o
+##  $K/syscall.o
 
 TOOLPREFIX = loongarch64-unknown-linux-gnu-
 

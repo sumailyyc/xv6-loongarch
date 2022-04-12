@@ -31,8 +31,8 @@ main()
     printf("trap init\n");
     apic_init();      // set up interrupt controller
     printf("apic init\n");
-//    extioi_init();
-//    printf("extend interrupt controller init\n");
+    extioi_init();
+    printf("extend interrupt controller init\n");
     binit();         // buffer cache
     printf("buffer init\n");
     iinit();         // inode table
