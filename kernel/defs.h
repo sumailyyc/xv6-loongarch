@@ -106,7 +106,6 @@ int             copyinstr(pagetable_t, char *, uint64, uint64);
 
 // apic.c
 void            apic_init(void);
-uint64          apic_claim(void);
 void            apic_complete(uint64 irq);
 
 // virtio_disk.c
@@ -165,6 +164,8 @@ int             pipewrite(struct pipe*, uint64, int);
 
 // extioi.c
 void            extioi_init(void);
+uint64          extioi_claim(void);
+void            extioi_complete(void);
 
 // syscall.c
 int             argint(int, int*);

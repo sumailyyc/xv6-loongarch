@@ -34,14 +34,9 @@ trapinit(void)
 void 
 kerneltrap()//todo
 {
-  printf("trap\n");
   int which_dev = 0;
   uint64 era = r_csr_era();
   uint64 prmd = r_csr_prmd();
-  printf("estat %x\n", r_csr_estat());
-  printf("era=%p eentry=%p\n", r_csr_era(), r_csr_eentry());
-  printf("ISR_BASE:%p\n",iocsr_readq(LOONGARCH_IOCSR_EXTIOI_ISR_BASE));
-  printf("ISR:%p\n",*(volatile uint64*)(LS7A_INT_STATUS_REG));
   
   if((prmd & PRMD_PPLV) != 0)
     panic("kerneltrap: not from privilege0");
@@ -95,16 +90,17 @@ devintr()//todo
     // this is a hardware interrupt, via IOCR.
 
     // irq indicates which device interrupted.
-    uint64 irq = apic_claim();
+    uint64 irq = extioi_claim();
     if(irq & (1U << UART0_IRQ)){
       uartintr();
 
     // tell the apic the device is
     // now allowed to interrupt again.
-      apic_complete(1U << UART0_IRQ);
+      extioi_complete();
     } else if(irq){
        printf("unexpected interrupt irq=%d\n", irq);
       apic_complete(irq);
+      extioi_complete();
     }
 
     return 1;

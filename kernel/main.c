@@ -20,28 +20,20 @@ main()
     printf("xv6 kernel is booting\n");
     printf("\n");
     kinit();         // physical page allocator
-    printf("physical memory init\n");
-    tlbinit();
-    printf("tlb init\n");
+    tlbinit();       // refresh tlb
     vminit();        // create kernel page table
-    printf("virtual memory init\n");
     procinit();      // process table
-    printf("proc init\n");
     trapinit();      // trap vectors
-    printf("trap init\n");
-    apic_init();      // set up interrupt controller
-    printf("apic init\n");
-    extioi_init();
-    printf("extend interrupt controller init\n");
+    apic_init();     // set up LS7A1000 interrupt controller
+    extioi_init();   // extended I/O interrupt controller
     binit();         // buffer cache
-    printf("buffer init\n");
     iinit();         // inode table
-    printf("inode table init\n");
     fileinit();      // file table
-    printf("file table init\n");
     __sync_synchronize();
     started = 1;
     intr_on();
+
+
     printf("init done\n");
   } else {
     while(started == 0)
