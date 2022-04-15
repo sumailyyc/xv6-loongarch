@@ -60,8 +60,8 @@ int             cpuid(void);
 void            exit(int);
 int             fork(void);
 int             growproc(int);
-void            proc_mapstacks(pagetable_t);
-pagetable_t     proc_pagetable(void);
+// void            proc_mapstacks(pagetable_t);
+pagetable_t     proc_pagetable(struct proc *p);
 void            proc_freepagetable(pagetable_t, uint64);
 int             kill(int);
 struct cpu*     mycpu(void);
@@ -90,7 +90,7 @@ void            kinit(void);
 // vm.c
 void            tlbinit(void);
 void            vminit(void);
-int             mappages(pagetable_t, uint64, uint64, uint64, int);
+int             mappages(pagetable_t, uint64, uint64, uint64, uint64);
 pagetable_t     uvmcreate(void);
 void            uvminit(pagetable_t, uchar *, uint);
 uint64          uvmalloc(pagetable_t, uint64, uint64);
@@ -108,10 +108,9 @@ int             copyinstr(pagetable_t, char *, uint64, uint64);
 void            apic_init(void);
 void            apic_complete(uint64 irq);
 
-// virtio_disk.c
-void            virtio_disk_init(void);
-void            virtio_disk_rw(struct buf *, int);
-void            virtio_disk_intr(void);
+// ramdisk.c
+void            ramdiskinit(void);
+void            ramdiskrw(struct buf*, int write);
 
 // bio.c
 void            binit(void);
@@ -165,7 +164,7 @@ int             pipewrite(struct pipe*, uint64, int);
 // extioi.c
 void            extioi_init(void);
 uint64          extioi_claim(void);
-void            extioi_complete(void);
+void            extioi_complete(uint64);
 
 // syscall.c
 int             argint(int, int*);
@@ -174,6 +173,9 @@ int             argaddr(int, uint64 *);
 int             fetchstr(uint64, char*, int);
 int             fetchaddr(uint64, uint64*);
 void            syscall();
+
+// exec.c
+int             exec(char*, char**);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

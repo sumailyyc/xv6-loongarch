@@ -21,13 +21,16 @@ OBJS = \
   $K/merror.o\
   $K/apic.o\
   $K/extioi.o\
-  $K/virtio_disk.o\
+  $K/ramdisk.o\
   $K/bio.o\
   $K/log.o\
   $K/fs.o\
   $K/pipe.o\
-  $K/exec.o
-##  $K/syscall.o
+  $K/exec.o\
+  $K/syscall.o\
+  $K/sysproc.o\
+  $K/sysfile.o\
+  $K/uservec.o
 
 TOOLPREFIX = loongarch64-unknown-linux-gnu-
 

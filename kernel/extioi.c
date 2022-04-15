@@ -22,7 +22,7 @@ extioi_claim(void)
     return iocsr_readq(LOONGARCH_IOCSR_EXTIOI_ISR_BASE);
 }
 
-void extioi_complete(void)
+void extioi_complete(uint64 irq)
 {
-    iocsr_writeq( iocsr_readq(LOONGARCH_IOCSR_EXTIOI_ISR_BASE) | 1,LOONGARCH_IOCSR_EXTIOI_ISR_BASE);
+    iocsr_writeq(irq, LOONGARCH_IOCSR_EXTIOI_ISR_BASE);
 }

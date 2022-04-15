@@ -8,8 +8,11 @@ SECTIONS
   .text : {
     *(.text .text.*)
     . = ALIGN(0x1000);
-    _eentry = .;
-    *(eentry)
+    _keentry = .;
+    *(k_eentry)
+    . = ALIGN(0x1000);
+    _ueentry = .;
+    *(u_eentry)
     . = ALIGN(0x1000);
     _tlbrentry = .;
     *(tlbrentry)

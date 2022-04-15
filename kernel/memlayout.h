@@ -27,8 +27,20 @@
 // for use by user pages
 // from physical address 0x90000000 to PHYSTOP.
 #define RAMBASE (0x90000000UL | DMWIN_MASK)
-#define RAMSTOP (RAMBASE + 1024*1024*1024)
+#define RAMSTOP (RAMBASE + 128*1024*1024)
 
-// virtio mmio interface
-#define VIRTIO0 (0x100000000 | DMWIN_MASK)
-#define VIRTIO0_IRQ 1
+// map kernel stacks beneath the maxva,
+// beyond one invalid guard pages.
+#define KSTACK  (MAXVA - PGSIZE)
+
+// User memory layout.
+// Address zero first:
+//   text
+//   original data and bss
+//   fixed-size stack
+//   expandable heap
+//   ...
+//   TRAPFRAME (p->trapframe, used by the trampoline)
+//   invalid guard page
+//   KSRACK (used for kernel thread)
+#define TRAPFRAME (KSTACK - 2*PGSIZE)

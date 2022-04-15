@@ -35,7 +35,8 @@ w_csr_crmd(uint32 x)
   asm volatile("csrwr %0, 0x0" : : "r" (x));
 }
 
-#define PRMD_PPLV (3L << 0)  // Previous mode
+#define PRMD_PPLV (3U << 0)  // Previous Privilege
+#define PRMD_PIE  (1U << 2)  // Previous Int_enable
 
 static inline uint32
 r_csr_prmd()
@@ -64,6 +65,8 @@ w_csr_era(uint64 x)
 {
   asm volatile("csrwr %0, 0x6" : : "r" (x));
 }
+
+#define CSR_ESTAT_ECODE  (0x3fU << 16)
 
 static inline uint32
 r_csr_estat()
@@ -203,6 +206,14 @@ w_csr_pwch(uint32 x)
   asm volatile("csrwr %0, 0x1d" : : "r" (x) );
 }
 
+static inline uint32
+r_csr_badi()
+{
+  uint32 x;
+  asm volatile("csrrd %0, 0x8" : "=r" (x) );
+  return x;
+}
+
 /* IOCSR */
 static inline uint32 iocsr_readl(uint32 reg)
 {
@@ -257,7 +268,7 @@ intr_off()
 #define PTE_MAT (1L << 4) //memory access type
 #define PTE_P (1L << 7) // physical page exists
 #define PTE_W (1L << 8) // writeable
-#define PTE_NX (1L << 62) //non executable
+#define PTE_NX (1UL << 62) //non executable
 #define PTE_NR (1L << 61) //non readable
 #define PTE_RPLV (1UL << 63) //restricted privilege level enable
 

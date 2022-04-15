@@ -24,23 +24,6 @@ static void freeproc(struct proc *p);
 // must be acquired before any p->lock.
 struct spinlock wait_lock;
 
-// Allocate a page for each process's kernel stack.
-// Map it high in memory, followed by an invalid
-// guard page.
-/*
-void
-proc_mapstacks(pagetable_t kpgtbl) {
-  struct proc *p;
-  
-  for(p = proc; p < &proc[NPROC]; p++) {
-    char *pa = kalloc();
-    if(pa == 0)
-      panic("kalloc");
-    uint64 va = KSTACK((int) (p - proc));
-    kvmmap(kpgtbl, va, (uint64)pa, PGSIZE, PTE_R | PTE_W);
-  }
-}*/
-
 // initialize the proc table at boot time.
 void
 procinit(void)
@@ -52,7 +35,7 @@ procinit(void)
   for(p = proc; p < &proc[NPROC]; p++) {
       initlock(&p->lock, "proc");
       p->state = UNUSED;
-//      p->kstack = KSTACK((int) (p - proc)); //todo
+      p->kstack = KSTACK; 
   }
 }
 
@@ -101,8 +84,6 @@ allocpid() {
 // If found, initialize state required to run in the kernel,
 // and return with p->lock held.
 // If there are no free procs, or a memory allocation fails, return 0.
-
-/*
 static struct proc*
 allocproc(void)
 {
@@ -130,7 +111,7 @@ found:
   }
 
   // An empty user page table.
-  p->pagetable = proc_pagetable();
+  p->pagetable = proc_pagetable(p);
   if(p->pagetable == 0){
     freeproc(p);
     release(&p->lock);
@@ -141,10 +122,10 @@ found:
   // which returns to user space.
   memset(&p->context, 0, sizeof(p->context));
   p->context.ra = (uint64)forkret;
-  p->context.sp = p->kstack + PGSIZE;//???
+  p->context.sp = p->kstack + PGSIZE;
 
   return p;
-}*/
+}
 
 // free a proc structure and the data hanging from it,
 // including user pages.
@@ -169,10 +150,10 @@ freeproc(struct proc *p)
 }
 
 // Create a user page table for a given process,
-// with no user memory, but with trampoline pages.
+// with no user memory, but with kstack pages.
 
 pagetable_t
-proc_pagetable(void)
+proc_pagetable(struct proc *p)
 {
   pagetable_t pagetable;
 
@@ -181,6 +162,27 @@ proc_pagetable(void)
   if(pagetable == 0)
     return 0;
 
+// map kernel stacks beneath the maxva,
+// beyond a NR and NW guard pages.
+  void *pa = kalloc();
+  if(pa == 0)
+    panic("kalloc");
+
+  if(mappages(pagetable, KSTACK, PGSIZE,
+              (uint64)pa, PTE_NX | PTE_P | PTE_W | PTE_MAT | PTE_D) < 0){
+    uvmfree(pagetable, 0);
+    kfree((void*)pa);
+    return 0;
+  }
+
+    // map the trapframe beneath 2 pages of KSTACK, for trampoline.S.
+  if(mappages(pagetable, TRAPFRAME, PGSIZE,
+              (uint64)(p->trapframe), PTE_NX | PTE_P | PTE_W | PTE_MAT | PTE_D) < 0){
+    uvmunmap(pagetable, KSTACK, 1, 1);
+    uvmfree(pagetable, 0);
+    return 0;
+  }
+  
   return pagetable;
 }
 
@@ -189,6 +191,8 @@ proc_pagetable(void)
 void
 proc_freepagetable(pagetable_t pagetable, uint64 sz)
 {
+  uvmunmap(pagetable, KSTACK, 1, 1);
+  uvmunmap(pagetable, TRAPFRAME, 1, 0);
   uvmfree(pagetable, sz);
 }
 
@@ -205,9 +209,8 @@ uchar initcode[] = {
 };//todo
 
 // Set up first user process.
-/*
 void
-userinit(void)
+userinit(void)//todo
 {
   struct proc *p;
 
@@ -221,7 +224,7 @@ userinit(void)
 
   // prepare for the very first "return" from kernel to user.
   p->trapframe->era = 0;      // user program counter
-  p->trapframe->sp = PGSIZE;  // user stack pointer //???
+  p->trapframe->sp = PGSIZE;  // user stack pointer 
 
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/"); 
@@ -229,7 +232,7 @@ userinit(void)
   p->state = RUNNABLE;
 
   release(&p->lock);
-}*/
+}
 
 // Grow or shrink user memory by n bytes.
 // Return 0 on success, -1 on failure.
@@ -253,7 +256,6 @@ growproc(int n)
 
 // Create a new process, copying the parent.
 // Sets up child kernel stack to return as if from fork() system call.
-/*
 int
 fork(void)
 {
@@ -278,7 +280,7 @@ fork(void)
   *(np->trapframe) = *(p->trapframe);
 
   // Cause fork to return 0 in the child.
-  np->trapframe->a0 = 0;//???
+  np->trapframe->a0 = 0;
 
   // increment reference counts on open file descriptors.
   for(i = 0; i < NOFILE; i++)
@@ -301,7 +303,7 @@ fork(void)
   release(&np->lock);
 
   return pid;
-}*/
+}
 
 // Pass p's abandoned children to init.
 // Caller must hold wait_lock.
@@ -321,7 +323,6 @@ reparent(struct proc *p)
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state
 // until its parent calls wait().
-/*
 void
 exit(int status)
 {
@@ -339,9 +340,9 @@ exit(int status)
     }
   }
 
-  begin_op();//???
-  iput(p->cwd);//???
-  end_op();//???
+  begin_op();
+  iput(p->cwd);
+  end_op();
   p->cwd = 0;
 
   acquire(&wait_lock);
@@ -362,7 +363,7 @@ exit(int status)
   // Jump into the scheduler, never to return.
   sched();
   panic("zombie exit");
-}*/
+}
 
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
@@ -490,7 +491,7 @@ yield(void)
 
 // A fork child's very first scheduling by scheduler()
 // will swtch to forkret.
-/*
+
 void
 forkret(void)
 {
@@ -508,7 +509,7 @@ forkret(void)
   }
 
   usertrapret();
-}*/
+}
 
 // Atomically release lock and sleep on chan.
 // Reacquires lock when awakened.

@@ -32,7 +32,7 @@ fetchstr(uint64 addr, char *buf, int max)
 }
 
 static uint64
-argraw(int n)
+argraw(int n)//todo
 {
   struct proc *p = myproc();
   switch (n) {

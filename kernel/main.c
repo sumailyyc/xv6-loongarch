@@ -29,11 +29,10 @@ main()
     binit();         // buffer cache
     iinit();         // inode table
     fileinit();      // file table
+    ramdiskinit();   // emulated hard disk
     __sync_synchronize();
     started = 1;
     intr_on();
-
-
     printf("init done\n");
   } else {
     while(started == 0)

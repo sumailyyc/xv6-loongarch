@@ -16,7 +16,7 @@ tlbinit(void)
 }
 
 void
-vminit(void)
+vminit(void)//todo
 {
   pagetable_t kpgtbl;
 
@@ -93,7 +93,7 @@ walkaddr(pagetable_t pagetable, uint64 va)
 // be page-aligned. Returns 0 on success, -1 if walk() couldn't
 // allocate a needed page-table page.
 int
-mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int perm)
+mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, uint64 perm)
 {
   uint64 a, last;
   pte_t *pte;
