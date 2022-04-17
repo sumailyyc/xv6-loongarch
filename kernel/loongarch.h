@@ -13,6 +13,15 @@
 
 // read and write tp, the thread pointer, which holds
 // this core's hartid (core number), the index into cpus[].
+
+static inline uint64
+r_sp()
+{
+  uint64 x;
+  asm volatile("addi.d %0, $sp, 0" : "=r" (x) );
+  return x;
+}
+
 static inline uint64
 r_tp()
 {
@@ -165,6 +174,15 @@ w_csr_asid(uint32 x)
   asm volatile("csrwr %0, 0x18" : : "r" (x) );
 }
 
+#define CSR_TCFG_EN            (1U << 0)
+#define CSR_TCFG_PER           (1U << 1)
+
+static inline void
+w_csr_tcfg(uint64 x)
+{
+  asm volatile("csrwr %0, 0x41" : : "r" (x) );
+}
+
 static inline void
 w_csr_tlbrehi(uint64 x)
 {
@@ -283,7 +301,7 @@ intr_off()
 #define PXSHIFT(level)  (PGSHIFT+(9*(level)))
 #define PX(level, va) ((((uint64) (va)) >> PXSHIFT(level)) & PXMASK)
 
-#define MAXVA (1L << (9 + 9 + 9 + 9 + 12 - 1)) //Lower half virtual address
+#define MAXVA (1L << (9 + 12 - 1)) //Lower half virtual address
 
 typedef uint64 pte_t;
 typedef uint64 *pagetable_t;

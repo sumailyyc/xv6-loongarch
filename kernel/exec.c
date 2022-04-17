@@ -92,6 +92,8 @@ exec(char *path, char **argv)
   // push the array of argv[] pointers.
   sp -= (argc+1) * sizeof(uint64);
   sp -= sp % 16;
+
+
   if(sp < stackbase)
     goto bad;
   if(copyout(pagetable, sp, (char *)ustack, (argc+1)*sizeof(uint64)) < 0)
@@ -106,6 +108,7 @@ exec(char *path, char **argv)
   for(last=s=path; *s; s++)
     if(*s == '/')
       last = s+1;
+
   safestrcpy(p->name, last, sizeof(p->name));
     
   // Commit to the user image.
@@ -114,6 +117,7 @@ exec(char *path, char **argv)
   p->sz = sz;
   p->trapframe->era = elf.entry;  // initial program counter = main
   p->trapframe->sp = sp; // initial stack pointer
+
   proc_freepagetable(oldpagetable, oldsz);
 
   return argc; // this ends up in a0, the first argument to main(argc, argv)

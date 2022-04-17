@@ -30,16 +30,15 @@ main()
     iinit();         // inode table
     fileinit();      // file table
     ramdiskinit();   // emulated hard disk
+    userinit();      // first user process
     __sync_synchronize();
     started = 1;
-    intr_on();
-    printf("init done\n");
   } else {
     while(started == 0)
       ;
     __sync_synchronize();
     printf("hart %d starting\n", cpuid());
   }
- 
+    scheduler(); 
 }
 

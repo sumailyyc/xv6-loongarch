@@ -10,7 +10,7 @@ Porting the xv6 OS to the LoongArch. Inspired by MIT's xv6-riscv Edition, check 
 
 ```bash
 
-make
+make all
 cd qemu-loongarch64-runenv
 ./run_loongach.sh -k ../kernel/kernel
 ```

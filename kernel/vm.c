@@ -11,25 +11,16 @@ tlbinit(void)
 {
   asm volatile("invtlb  0x0,$zero,$zero");
   w_csr_stlbps(0xcU);
-  w_csr_asid(0x0U);
+  w_csr_asid(0x0U);//todo
   w_csr_tlbrehi(0xcU);
 }
 
 void
 vminit(void)//todo
 {
-  pagetable_t kpgtbl;
-
-  kpgtbl = (pagetable_t) kalloc();
-  memset(kpgtbl, 0, PGSIZE);
-  volatile pagetable_t temp = kpgtbl;
-  w_csr_pgdl((uint64)temp);
+  memset((void *)(DMWIN_MASK | 0x0UL), 0, PGSIZE);
   w_csr_pwcl((PTEWIDTH << 30)|(DIR2WIDTH << 25)|(DIR2BASE << 20)|(DIR1WIDTH << 15)|(DIR1BASE << 10)|(PTWIDTH << 5)|(PTBASE << 0));
   w_csr_pwch((DIR4WIDTH << 18)|(DIR3WIDTH << 6)|(DIR3BASE << 0));
-  
-  void* pa = kalloc();
-  if(mappages(kpgtbl, 0x0UL, PGSIZE, (uint64)pa, PTE_P|PTE_W|PTE_MAT|PTE_D) != 0)
-  panic("kvmmap");
 }
 
 // Return the address of the PTE in page table pagetable
@@ -60,6 +51,7 @@ walk(pagetable_t pagetable, uint64 va, int alloc)
         return 0;
       memset(pagetable, 0, PGSIZE);
       *pte = PA2PTE(pagetable) | PTE_V;
+//     printf("%p\n",*pte);
     }
   }
   return &pagetable[PX(0, va)];
@@ -109,6 +101,7 @@ mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, uint64 perm)
     if(*pte & PTE_V)
       panic("mappages: remap");
     *pte = PA2PTE(pa) | perm | PTE_V;
+//    printf("pte:%p\n",*pte);
     if(a == last)
       break;
     a += PGSIZE;

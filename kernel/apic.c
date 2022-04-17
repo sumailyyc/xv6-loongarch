@@ -9,7 +9,7 @@
 //
 
 void
-apic_init(void)//todo
+apic_init(void)
 {
   *(volatile uint64*)(LS7A_INT_MASK_REG) = ~(0x1UL << UART0_IRQ);
 

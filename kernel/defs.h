@@ -90,6 +90,7 @@ void            kinit(void);
 // vm.c
 void            tlbinit(void);
 void            vminit(void);
+pte_t *         walk(pagetable_t pagetable, uint64 va, int alloc);
 int             mappages(pagetable_t, uint64, uint64, uint64, uint64);
 pagetable_t     uvmcreate(void);
 void            uvminit(pagetable_t, uchar *, uint);
