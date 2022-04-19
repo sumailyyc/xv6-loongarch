@@ -61,6 +61,7 @@ struct trapframe {
   /* 256 */ uint64 kernel_trap;   // usertrap()
   /* 264 */ uint64 era;           // saved user program counter
   /* 272 */ uint64 kernel_hartid; // saved kernel tp
+  /* 280 */ uint64 kernel_pgdl;   // saved kernel pagetable
 };
 
 
@@ -84,7 +85,7 @@ struct proc
   uint64 kstack;               // Virtual address of kernel stack
   uint64 sz;                   // Size of process memory (bytes)
   pagetable_t pagetable;    // User lower half address page table
-  struct trapframe *trapframe; // data page for trampoline.S, use DMW address
+  struct trapframe *trapframe; // data page for uservec.S, use DMW address
   struct context context;      // swtch() here to run process
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory

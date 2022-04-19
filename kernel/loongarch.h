@@ -189,6 +189,14 @@ w_csr_tlbrehi(uint64 x)
   asm volatile("csrwr %0, 0x8e" : : "r" (x) );
 }
 
+static inline uint64
+r_csr_pgdl()
+{
+  uint64 x;
+  asm volatile("csrrd %0, 0x19" : "=r" (x) );
+  return x;
+}
+
 static inline void
 w_csr_pgdl(uint64 x)
 {

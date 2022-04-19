@@ -29,9 +29,9 @@
 #define RAMBASE (0x90000000UL | DMWIN_MASK)
 #define RAMSTOP (RAMBASE + 128*1024*1024)
 
-// map kernel stacks beneath the maxva,
-// beyond one invalid guard pages.
-#define KSTACK  (MAXVA - PGSIZE)
+// map kernel stacks beneath the trampframe,
+// each surrounded by invalid guard pages.
+#define KSTACK(p) (TRAPFRAME - ((p)+1)* 2*PGSIZE)
 
 // User memory layout.
 // Address zero first:
@@ -40,7 +40,7 @@
 //   fixed-size stack
 //   expandable heap
 //   ...
-//   TRAPFRAME (p->trapframe, used by the trampoline)
 //   invalid guard page
 //   KSRACK (used for kernel thread)
-#define TRAPFRAME (KSTACK - 2*PGSIZE)
+//   TRAPFRAME (p->trapframe, used by the uservec)
+#define TRAPFRAME (MAXVA - PGSIZE)

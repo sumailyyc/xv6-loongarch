@@ -69,6 +69,11 @@ uservec:
         # load the address of usertrap(), p->trapframe->kernel_trap
         ld.d   $t0, $a0, 256
 
+        # restore kernel page table from p->trapframe->kernel_pgdl
+        ld.d   $t1, $a0, 280
+        csrwr  $t1, LOONGARCH_CSR_PGDL
+        invtlb 0x0,$zero,$zero
+
         # jump to usertrap(), which does not return
         jirl   $zero ,$t0, 0
 

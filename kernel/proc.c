@@ -24,6 +24,23 @@ static void freeproc(struct proc *p);
 // must be acquired before any p->lock.
 struct spinlock wait_lock;
 
+// Allocate a page for each process's kernel stack.
+// Map it high in memory, followed by an invalid
+// guard page.
+void
+proc_mapstacks(pagetable_t kpgtbl) {
+  struct proc *p;
+  
+  for(p = proc; p < &proc[NPROC]; p++) {
+    char *pa = kalloc();
+    if(pa == 0)
+      panic("kalloc");
+    uint64 va = KSTACK((int) (p - proc));
+    if(mappages(kpgtbl, va, PGSIZE, (uint64)pa,  PTE_NX | PTE_P | PTE_W | PTE_MAT | PTE_D) != 0)
+      panic("kvmmap");
+  }
+}
+
 // initialize the proc table at boot time.
 void
 procinit(void)
@@ -35,7 +52,7 @@ procinit(void)
   for(p = proc; p < &proc[NPROC]; p++) {
       initlock(&p->lock, "proc");
       p->state = UNUSED;
-      p->kstack = KSTACK; 
+      p->kstack = KSTACK((int) (p - proc)); 
   }
 }
 
@@ -162,23 +179,9 @@ proc_pagetable(struct proc *p)
   if(pagetable == 0)
     return 0;
 
-// map kernel stacks beneath the maxva,
-// beyond a NR and NW guard pages.
-  void *pa = kalloc();
-  if(pa == 0)
-    panic("kalloc");
-
-  if(mappages(pagetable, KSTACK, PGSIZE,
-              (uint64)pa, PTE_NX | PTE_P | PTE_W | PTE_MAT | PTE_D) < 0){
-    uvmfree(pagetable, 0);
-    kfree((void*)pa);
-    return 0;
-  }
-
-    // map the trapframe beneath 2 pages of KSTACK, for trampoline.S.
+    // map the trapframe beneath 2 pages of KSTACK, for uservec.S.
   if(mappages(pagetable, TRAPFRAME, PGSIZE,
               (uint64)(p->trapframe), PTE_NX | PTE_P | PTE_W | PTE_MAT | PTE_D) < 0){
-    uvmunmap(pagetable, KSTACK, 1, 1);
     uvmfree(pagetable, 0);
     return 0;
   }
@@ -191,9 +194,6 @@ proc_pagetable(struct proc *p)
 void
 proc_freepagetable(pagetable_t pagetable, uint64 sz)
 {
-      
-  uvmunmap(pagetable, KSTACK, 1, 1);
-  printf("exec\n");
   uvmunmap(pagetable, TRAPFRAME, 1, 0);
   uvmfree(pagetable, sz);
 }
@@ -221,9 +221,6 @@ userinit(void)
 
   p = allocproc();
   initproc = p;
-
-  volatile pagetable_t temp = p->pagetable;
-  w_csr_pgdl((uint64)temp);
   
   // allocate one user page and copy init's instructions
   // and data into it.

@@ -20,7 +20,6 @@ main()
     printf("xv6 kernel is booting\n");
     printf("\n");
     kinit();         // physical page allocator
-    tlbinit();       // refresh tlb
     vminit();        // create kernel page table
     procinit();      // process table
     trapinit();      // trap vectors

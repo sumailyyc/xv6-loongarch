@@ -18,7 +18,15 @@ tlbinit(void)
 void
 vminit(void)//todo
 {
-  memset((void *)(DMWIN_MASK | 0x0UL), 0, PGSIZE);
+  pagetable_t kpgtbl;
+
+  kpgtbl = (pagetable_t) kalloc();
+  memset(kpgtbl, 0, PGSIZE);
+  proc_mapstacks(kpgtbl);
+
+  w_csr_pgdl((uint64)kpgtbl);
+  tlbinit();
+
   w_csr_pwcl((PTEWIDTH << 30)|(DIR2WIDTH << 25)|(DIR2BASE << 20)|(DIR1WIDTH << 15)|(DIR1BASE << 10)|(PTWIDTH << 5)|(PTBASE << 0));
   w_csr_pwch((DIR4WIDTH << 18)|(DIR3WIDTH << 6)|(DIR3BASE << 0));
 }
@@ -51,7 +59,6 @@ walk(pagetable_t pagetable, uint64 va, int alloc)
         return 0;
       memset(pagetable, 0, PGSIZE);
       *pte = PA2PTE(pagetable) | PTE_V;
-//     printf("%p\n",*pte);
     }
   }
   return &pagetable[PX(0, va)];
@@ -101,7 +108,6 @@ mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, uint64 perm)
     if(*pte & PTE_V)
       panic("mappages: remap");
     *pte = PA2PTE(pa) | perm | PTE_V;
-//    printf("pte:%p\n",*pte);
     if(a == last)
       break;
     a += PGSIZE;
@@ -130,7 +136,7 @@ uvmunmap(pagetable_t pagetable, uint64 va, uint64 npages, int do_free)
     if(PTE_FLAGS(*pte) == PTE_V)
       panic("uvmunmap: not a leaf");
     if(do_free){
-      uint64 pa = PTE2PA(*pte);
+      uint64 pa = PTE2PA(*pte);    
       kfree((void*)(pa | DMWIN_MASK));
     }
     *pte = 0;
@@ -185,7 +191,7 @@ uvmalloc(pagetable_t pagetable, uint64 oldsz, uint64 newsz)
       return 0;
     }
     memset(mem, 0, PGSIZE);
-    if(mappages(pagetable, a, PGSIZE, (uint64)mem, PTE_P|PTE_W|PTE_PLV|PTE_MAT) != 0){
+    if(mappages(pagetable, a, PGSIZE, (uint64)mem, PTE_P|PTE_W|PTE_PLV|PTE_MAT|PTE_D) != 0){
       kfree(mem);
       uvmdealloc(pagetable, a, oldsz);
       return 0;

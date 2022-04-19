@@ -34,7 +34,7 @@ trapinit(void)
 
 //
 // handle an interrupt, exception, or system call from user space.
-// called from trampoline.S
+// called from uservec.S
 //
 void
 usertrap(void)
@@ -99,16 +99,17 @@ usertrapret(void)
   // we're back in user space, where usertrap() is correct.
   intr_off();
 
-  // send syscalls, interrupts, and exceptions to trampoline.S
+  // send syscalls, interrupts, and exceptions to uservec.S
   w_csr_eentry((uint64)uservec);  //maybe todo
 
   // set up trapframe values that uservec will need when
   // the process next re-enters the kernel.
+  p->trapframe->kernel_pgdl = r_csr_pgdl();         // kernel page table
   p->trapframe->kernel_sp = p->kstack + PGSIZE; // process's kernel stack
   p->trapframe->kernel_trap = (uint64)usertrap;
   p->trapframe->kernel_hartid = r_tp();         // hartid for cpuid()
 
-  // set up the registers that trampoline.S's ertn will use
+  // set up the registers that uservec.S's ertn will use
   // to get to user space.
   
   // set Previous Privilege mode to User Privilege3.
@@ -120,10 +121,10 @@ usertrapret(void)
   // set S Exception Program Counter to the saved user pc.
   w_csr_era(p->trapframe->era);
 
-  // tell trampoline.S the user page table to switch to.
+  // tell uservec.S the user page table to switch to.
   volatile uint64 pgdl = (uint64)(p->pagetable);
 
-  // jump to trampoline.S at the top of memory, which 
+  // jump to uservec.S at the top of memory, which 
   // switches to the user page table, restores user registers,
   // and switches to user mode with ertn.
   userret(TRAPFRAME, pgdl);
