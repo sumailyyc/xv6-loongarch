@@ -33,7 +33,7 @@ KERNEL="./vmlinux"
 INITRD="busybox-rootfs.img"
 USE_GRAPHIC="no"
 DEBUG=''
-QEMU="qemu-system-loongarch64"
+QEMU="./qemu-system-loongarch64"
 #DRIVE="file=fs.img,if=none,format=raw,id=x0"
 #DEVICE="virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0"
 
