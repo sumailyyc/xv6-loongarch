@@ -5,6 +5,7 @@ Porting the xv6 OS to the LoongArch. Inspired by MIT's xv6-riscv Edition, check 
 ## Dependencies
 
 * [LoongArch Toolchain](https://github.com/loongson/build-tools/releases/download/2021.12.21/loongarch64-clfs-2021-12-18-cross-tools-gcc-full.tar.xz)
+* [Qemu](https://github.com/foxsen/qemu.git)
 
 ## Run on qemu-system-loongarch64
 
