@@ -11,12 +11,12 @@ tlbinit(void)
 {
   asm volatile("invtlb  0x0,$zero,$zero");
   w_csr_stlbps(0xcU);
-  w_csr_asid(0x0U);//todo
+  w_csr_asid(0x0U);
   w_csr_tlbrehi(0xcU);
 }
 
 void
-vminit(void)//todo
+vminit(void)
 {
   pagetable_t kpgtbl;
 

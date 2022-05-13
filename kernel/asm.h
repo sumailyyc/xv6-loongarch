@@ -1,7 +1,9 @@
 #define LOONGARCH_CSR_CRMD		    0x0	    /* Current mode info */
+#define LOONGARCH_CSR_PRMD          0x1     /* Prev-exception mode info */
 #define LOONGARCH_CSR_CPUID		    0x20	/* CPU core id */
 
 #define LOONGARCH_CSR_SAVE0		    0x30    /* Kscratch registers */
+#define LOONGARCH_CSR_SAVE1         0x31    /* Kscratch registers */
 
 #define LOONGARCH_CSR_DMWIN0		0x180	/* 64 direct map win0: MEM & IF */
 #define LOONGARCH_CSR_DMWIN1		0x181	/* 64 direct map win1: MEM & IF */

@@ -17,7 +17,7 @@ main()
     consoleinit();
     printfinit();
     printf("\n");
-    printf("xv6 kernel is booting\n");
+    printf("xv6-loongarch kernel is booting\n");
     printf("\n");
     kinit();         // physical page allocator
     vminit();        // create kernel page table

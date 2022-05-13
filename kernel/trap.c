@@ -12,6 +12,7 @@ uint ticks;
 // in kernelvec.S, calls kerneltrap().
 void kernelvec();
 void uservec();
+void handle_excep();
 void handle_tlbr();
 void handle_merr();
 void userret(uint64, uint64);
@@ -26,7 +27,7 @@ trapinit(void)
   uint64 tcfg = 0x1000000UL | CSR_TCFG_EN | CSR_TCFG_PER;
   w_csr_ecfg(ecfg);
   w_csr_tcfg(tcfg);
-  w_csr_eentry((uint64)kernelvec);
+  w_csr_eentry((uint64)handle_excep);
   w_csr_tlbrentry((uint64)handle_tlbr);
   w_csr_merrentry((uint64)handle_merr);
   intr_on();
@@ -43,10 +44,6 @@ usertrap(void)
 
   if((r_csr_prmd() & PRMD_PPLV) == 0)
     panic("usertrap: not from user mode");
-
-  // send interrupts and exceptions to kerneltrap(),
-  // since we're now in the kernel.
-  w_csr_eentry((uint64)kernelvec);
 
   struct proc *p = myproc();
   
@@ -99,14 +96,11 @@ usertrapret(void)
   // we're back in user space, where usertrap() is correct.
   intr_off();
 
-  // send syscalls, interrupts, and exceptions to uservec.S
-  w_csr_eentry((uint64)uservec);  //maybe todo
 
   // set up trapframe values that uservec will need when
   // the process next re-enters the kernel.
   p->trapframe->kernel_pgdl = r_csr_pgdl();         // kernel page table
   p->trapframe->kernel_sp = p->kstack + PGSIZE; // process's kernel stack
-  p->trapframe->kernel_trap = (uint64)usertrap;
   p->trapframe->kernel_hartid = r_tp();         // hartid for cpuid()
 
   // set up the registers that uservec.S's ertn will use

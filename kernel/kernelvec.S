@@ -2,11 +2,13 @@
         # interrupts and exceptions while in privilege0
         # push all registers, call kerneltrap(), restore, return.
         #
-.section k_eentry
+ #include "asm.h"       
 .globl kerneltrap
 .globl kernelvec
 .align 4
 kernelvec:
+        csrrd  $t0, LOONGARCH_CSR_SAVE0
+
         // make room to save registers.
         addi.d $sp, $sp, -256
 

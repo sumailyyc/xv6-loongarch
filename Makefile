@@ -30,7 +30,8 @@ OBJS = \
   $K/syscall.o\
   $K/sysproc.o\
   $K/sysfile.o\
-  $K/uservec.o
+  $K/uservec.o\
+  $K/exception.o
 
 TOOLPREFIX = loongarch64-unknown-linux-gnu-
 
@@ -125,7 +126,7 @@ fs.img: mkfs/mkfs README $(UPROGS)
 all: fs.img $K/kernel 
 
 clean: 
-	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
+	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg *.d \
 	*/*.o */*.d */*.asm */*.sym \
 	$U/initcode $U/initcode.out $K/kernel fs.img \
 	mkfs/mkfs .gdbinit \
